@@ -13,6 +13,7 @@ import (
 
 var port string
 var routes map[string]string
+var proxyServer map[string]*httputil.ReverseProxy
 
 func init() {
 	port = fmt.Sprintf(":%s", os.Getenv("HTTP_PORT"))
@@ -25,6 +26,10 @@ func init() {
 		fmt.Printf("ROUTES: %v\n, Err: %v\n", os.Getenv("ROUTES"), errors.New("no route found"))
 		os.Exit(1)
 	}
+	for i := range routes {
+		urlRoute, _ := url.Parse(routes[i])
+		proxyServer[i] = httputil.NewSingleHostReverseProxy(urlRoute)
+	}
 }
 
 func main() {
@@ -33,10 +38,9 @@ func main() {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	for i := range routes {
+	for i := range proxyServer {
 		if strings.HasPrefix(r.URL.Path, i) {
-			urlRoute, _ := url.Parse(routes[i])
-			httputil.NewSingleHostReverseProxy(urlRoute).ServeHTTP(w, r)
+			proxyServer[i].ServeHTTP(w, r)
 		}
 	}
 }
