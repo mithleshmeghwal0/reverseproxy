@@ -13,7 +13,7 @@ import (
 
 var port string
 var routes map[string]string
-var proxyServer map[string]*httputil.ReverseProxy
+var proxyServer map[string]*httputil.ReverseProxy = map[string]*httputil.ReverseProxy{}
 
 func init() {
 	port = fmt.Sprintf(":%s", os.Getenv("HTTP_PORT"))
